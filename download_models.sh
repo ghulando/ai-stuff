@@ -26,8 +26,7 @@ snapshot_download(
     echo "Finished downloading $MODEL_NAME"
 }
 
-# Download models
-download_model "deepseek-coder" "deepseek-ai/deepseek-coder-1.3b-base"
-download_model "llama2" "meta-llama/Llama-2-7b-chat-hf"
+# Download TinyLlama model
+download_model "tiny-llama" "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
 
-echo "All models downloaded successfully!"
+echo "Model downloaded successfully!"

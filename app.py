@@ -5,63 +5,66 @@ import os
 
 class ModelManager:
     def __init__(self):
-        self.models = {}
-        self.current_model = None
+        self.model = None
+        self.tokenizer = None
         self.device = "cpu"
-        # Using smaller, more efficient models
-        self.available_models = {
-            "gpt2": "gpt2",  # 124M parameters
-            "distilgpt2": "distilgpt2",  # 82M parameters
-            "bloom-560m": "bigscience/bloom-560m",  # 560M parameters
-            "tiny-llama": "TinyLlama/TinyLlama-1.1B-Chat-v1.0"  # 1.1B parameters
-        }
+        self.model_path = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
 
-    def load_model(self, model_name):
-        if model_name not in self.models:
-            print(f"Loading {model_name}...")
-            model_path = self.available_models[model_name]
+    def load_model(self):
+        if self.model is None:
+            print("Loading TinyLlama model...")
             
-            # Optimize tokenizer loading
-            tokenizer = AutoTokenizer.from_pretrained(
-                model_path,
-                trust_remote_code=True,
-                local_files_only=True  # Use cached files if available
-            )
-            
-            # Configure 8-bit quantization
-            quantization_config = BitsAndBytesConfig(
-                load_in_8bit=True,
-                llm_int8_threshold=6.0
-            )
-            
-            # Load model with optimizations
-            model = AutoModelForCausalLM.from_pretrained(
-                model_path,
-                torch_dtype=torch.float32,
-                device_map=self.device,
-                low_cpu_mem_usage=True,
-                trust_remote_code=True,
-                quantization_config=quantization_config
-            )
-            
-            # Enable model optimization
-            model.eval()  # Set to evaluation mode
-            torch.set_num_threads(os.cpu_count())  # Use all CPU cores
-            
-            self.models[model_name] = (model, tokenizer)
+            try:
+                # Optimize tokenizer loading
+                self.tokenizer = AutoTokenizer.from_pretrained(
+                    self.model_path,
+                    trust_remote_code=True
+                )
+                
+                try:
+                    # Try 8-bit quantization first
+                    quantization_config = BitsAndBytesConfig(
+                        load_in_8bit=True,
+                        llm_int8_threshold=6.0
+                    )
+                    
+                    # Load model with 8-bit quantization
+                    self.model = AutoModelForCausalLM.from_pretrained(
+                        self.model_path,
+                        torch_dtype=torch.float32,
+                        device_map=self.device,
+                        low_cpu_mem_usage=True,
+                        trust_remote_code=True,
+                        quantization_config=quantization_config
+                    )
+                except ImportError:
+                    print("8-bit quantization not available, falling back to 32-bit")
+                    # Load model without quantization
+                    self.model = AutoModelForCausalLM.from_pretrained(
+                        self.model_path,
+                        torch_dtype=torch.float32,
+                        device_map=self.device,
+                        low_cpu_mem_usage=True,
+                        trust_remote_code=True
+                    )
+                
+                # Enable model optimization
+                self.model.eval()  # Set to evaluation mode
+                torch.set_num_threads(os.cpu_count())  # Use all CPU cores
+                
+                return "Model loaded successfully!"
+            except Exception as e:
+                return f"Error loading model: {str(e)}"
         
-        self.current_model = model_name
-        return "Model loaded successfully!"
+        return "Model already loaded!"
 
     def generate_response(self, prompt):
-        if not self.current_model:
-            return "Please select a model first!"
-        
-        model, tokenizer = self.models[self.current_model]
+        if self.model is None:
+            return "Please load the model first!"
         
         # Optimize input processing
         with torch.no_grad():  # Disable gradient calculation
-            inputs = tokenizer(
+            inputs = self.tokenizer(
                 prompt,
                 return_tensors="pt",
                 padding=True,
@@ -69,32 +72,28 @@ class ModelManager:
                 max_length=512  # Limit input length
             ).to(self.device)
             
-            outputs = model.generate(
+            outputs = self.model.generate(
                 **inputs,
-                max_length=512,  # Reduced from 2048 for faster generation
+                max_length=512,  # Reduced for faster generation
                 num_return_sequences=1,
                 temperature=0.7,
                 do_sample=True,
-                pad_token_id=tokenizer.eos_token_id,
+                pad_token_id=self.tokenizer.eos_token_id,
                 num_beams=1,  # Disable beam search for faster generation
                 early_stopping=True
             )
         
-        return tokenizer.decode(outputs[0], skip_special_tokens=True)
+        return self.tokenizer.decode(outputs[0], skip_special_tokens=True)
 
 def create_ui():
     manager = ModelManager()
     
-    with gr.Blocks(title="AI Models Interface") as interface:
-        gr.Markdown("# Fast AI Models Interface (CPU Optimized)")
+    with gr.Blocks(title="TinyLlama Interface") as interface:
+        gr.Markdown("# TinyLlama Chat Interface (CPU Optimized)")
         
         with gr.Row():
-            model_dropdown = gr.Dropdown(
-                choices=list(manager.available_models.keys()),
-                label="Select Model",
-                value="distilgpt2"  # Set default model
-            )
-            load_btn = gr.Button("Load Model")
+            load_btn = gr.Button("Load TinyLlama Model")
+            status = gr.Textbox(label="Status")
         
         with gr.Row():
             with gr.Column():
@@ -113,8 +112,7 @@ def create_ui():
         
         load_btn.click(
             fn=manager.load_model,
-            inputs=[model_dropdown],
-            outputs=[gr.Textbox(label="Status")]
+            outputs=[status]
         )
         
         submit_btn.click(
