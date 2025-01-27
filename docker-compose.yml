@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  ai-models:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "7860:7860"  # Gradio UI port
+      - "8080:8080"  # API port
+    volumes:
+      - ./models:/app/models
+      - ./cache:/root/.cache
+    environment:
+      - USE_CPU=1  # Force CPU usage
+    networks:
+      - ai-network
+
+networks:
+  ai-network:
+    driver: bridge
