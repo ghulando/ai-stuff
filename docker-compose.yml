@@ -1,21 +1,52 @@
 version: '3.8'
 
 services:
-  ai-models:
+  # Ollama Service
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    volumes:
+      - ollama_data:/root/.ollama
+      - ./models:/models
+    ports:
+      - "${OLLAMA_PORT}:11434"
+    networks:
+      - ai-network
+
+  # Open WebUI for Ollama
+  webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: webui
+    depends_on:
+      - ollama
+    ports:
+      - "3000:8080"
+    environment:
+      - OLLAMA_API_BASE_URL=http://ollama:11434/api
+    volumes:
+      - webui_data:/data
+    networks:
+      - ai-network
+
+  # Model Downloader
+  downloader:
     build:
       context: .
-      dockerfile: Dockerfile
-    ports:
-      - "7860:7860"  # Gradio UI port
-      - "8080:8080"  # API port
-    volumes:
-      - ./models:/app/models
-      - ./cache:/root/.cache
+      dockerfile: Dockerfile.downloader
+    container_name: model-downloader
+    depends_on:
+      - ollama
     environment:
-      - USE_CPU=1  # Force CPU usage
+      - HF_TOKEN=${HF_TOKEN}
+    volumes:
+      - ./models:/models
     networks:
       - ai-network
 
 networks:
   ai-network:
     driver: bridge
+
+volumes:
+  ollama_data:
+  webui_data:

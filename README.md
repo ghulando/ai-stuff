@@ -1,59 +1,70 @@
-# AI Models Docker Setup
+# AI Models with Ollama and Open WebUI
 
-This repository contains a Dockerized setup for running multiple open-source AI models with a local UI interface.
+This repository contains a Docker Compose setup for running AI models using Ollama with Open WebUI interface.
 
 ## Prerequisites
 
 - Docker and Docker Compose
-- NVIDIA GPU with CUDA support
-- NVIDIA Container Toolkit installed
+- At least 8GB of RAM for running models
+- (Optional) NVIDIA GPU with CUDA support for faster inference
+- Hugging Face account and access token (for TinyLlama model)
 
-## Models Included
+## Features
 
-- Deepseek Coder (1.3B base model)
-- LLaMA 2 (7B chat model)
+- Easy-to-use web interface with Open WebUI
+- Automatic model downloading (TinyLlama and llama2:1b)
+- Support for multiple models
+- Docker-based setup for easy deployment
 
 ## Setup Instructions
 
-1. Make the download script executable:
+1. Create a `.env` file with your configuration:
    ```bash
-   chmod +x download_models.sh
+   OLLAMA_PORT=11434
+   HF_TOKEN=your_huggingface_token  # Replace with your Hugging Face token
    ```
 
-2. Download the models:
+2. Start the services:
    ```bash
-   ./download_models.sh
+   docker-compose up -d
    ```
-   Note: You'll need Hugging Face authentication for some models. Use `huggingface-cli login` with your access token.
+   This will:
+   - Start Ollama and Open WebUI
+   - Download TinyLlama from Hugging Face
+   - Download llama2:1b from Ollama
 
-3. Build and start the Docker container:
-   ```bash
-   docker-compose up --build
-   ```
+3. Access the Web UI:
+   Open your browser and navigate to `http://localhost:3000`
 
-4. Access the UI:
-   Open your browser and navigate to `http://localhost:7860`
+## Components
 
-## Usage
-
-1. Select a model from the dropdown menu
-2. Click "Load Model" to initialize it
-3. Enter your prompt in the input box
-4. Click "Generate" to get the model's response
+- **Ollama**: Handles model serving and inference
+- **Open WebUI**: Provides the user interface for interacting with models
+- **Model Downloader**: Downloads TinyLlama and llama2:1b models automatically
 
 ## Directory Structure
 
-- `app.py`: Main application file with the Gradio UI
-- `Dockerfile`: Container configuration
 - `docker-compose.yml`: Service orchestration
-- `requirements.txt`: Python dependencies
-- `download_models.sh`: Script to download models
+- `.env`: Environment configuration
+- `Dockerfile.downloader`: Model downloader configuration
+- `download.sh`: Model download script
 - `models/`: Directory for downloaded models
-- `cache/`: Cache directory for model weights
+
+## Usage
+
+1. Open the Web UI at `http://localhost:3000`
+2. The following models will be available:
+   - TinyLlama (downloaded from Hugging Face)
+   - llama2:1b (downloaded from Ollama)
+3. Start chatting with your preferred model
+4. You can:
+   - Switch between models
+   - Adjust model parameters
+   - View model information
 
 ## Notes
 
-- Models are downloaded to the `models` directory and mounted into the container
-- The UI runs on port 7860
-- GPU acceleration is enabled by default
-- Model weights are cached for faster loading
+- Models are downloaded automatically during startup
+- Models are persisted in Docker volumes and the models directory
+- The Web UI runs on port 3000
+- Ollama API is available on port 11434
