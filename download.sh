@@ -19,7 +19,7 @@ echo "Waiting for Ollama service..."
 sleep 10
 
 # Download from Ollama
-echo "Downloading llama2:1b from Ollama..."
+echo "Downloading llama3.2:1b from Ollama..."
 curl -X POST http://ollama:11434/api/pull -d '{"name": "llama2:1b"}'
 
 echo "Downloads completed!" 
