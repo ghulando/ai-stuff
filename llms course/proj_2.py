@@ -115,8 +115,7 @@ def main():
     yield from {book.get("author") for book in books if book.get("author")}
     """
     
-    # Get explanations from both models
-    # get_gpt4_explanation(question)
+    get_gpt4_explanation(question)
     get_llama_explanation(question)
 
 if __name__ == '__main__':
