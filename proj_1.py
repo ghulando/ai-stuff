@@ -203,7 +203,7 @@ def main():
     url = os.getenv('COMPANY_URL', 'https://edwarddonner.com')
     
     # Use streaming by default, but allow override
-    use_streaming = os.getenv('USE_STREAMING', 'true').lower() == 'true'
+    use_streaming = os.getenv('USE_STREAMING', 'false').lower() == 'true'
     
     if use_streaming:
         stream_brochure(company_name, url)
