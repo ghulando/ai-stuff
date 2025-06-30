@@ -1,46 +1,57 @@
-# AI Models with Ollama and Open WebUI
+# AI Experiments & Tools
 
-This repository contains a Docker Compose setup for running AI models using Ollama with Open WebUI interface.
+This repository is a collection of various AI experiments, tools, and proof-of-concepts. It serves as a playground for exploring different AI technologies, frameworks, and integrations.
 
-## Prerequisites
+## 🧪 Current Experiments
+
+### Ollama + Open WebUI Setup
+
+A Docker Compose setup for running AI models locally with a web interface.
+
+**Location**: `ollama-webui/` directory (`docker-compose.yml`, `Dockerfile.downloader`, `download.sh`)
+
+**What it does**:
+
+- Runs Ollama for local AI model inference
+- Provides Open WebUI for easy model interaction
+- Automatically downloads TinyLlama and llama3.2:1b models
+
+## 🚀 Planned Experiments
+
+- **LiteLLM**: Unified API for multiple LLM providers
+- **n8n**: AI workflow automation
+- **LangChain**: AI application development framework
+- **Vector Databases**: Embedding storage and retrieval
+- **Custom AI Agents**: Specialized AI automation tools
+- **Multi-modal AI**: Vision, audio, and text processing
+- **AI Fine-tuning**: Custom model training experiments
+
+## 📋 General Prerequisites
 
 - Docker and Docker Compose
-- At least 8GB of RAM for running models
+- At least 8GB of RAM (more for larger models)
 - (Optional) NVIDIA GPU with CUDA support for faster inference
-- Hugging Face account and access token (for TinyLlama model)
+- Various API keys depending on the experiment (Hugging Face, OpenAI, etc.)
 
-## Features
+## 🎯 Repository Structure
 
-- Easy-to-use web interface with Open WebUI
-- Automatic model downloading (TinyLlama and llama3.2:1b)
-- Support for multiple models
-- Docker-based setup for easy deployment
-- Terminal-based interaction options
+Each experiment will be organized in its own directory or clearly documented section. This keeps different AI tools and concepts separate while maintaining easy access to all experiments.
 
-## Setup Instructions
+## 🛠️ Setup Instructions
 
-1. Clone this repository:
+### Ollama + Open WebUI Experiment
+
+1. Navigate to the experiment directory:
 
    ```bash
-   git clone <repository-url>
-   cd <repository-name>
+   cd ollama-webui
    ```
 
-2. Create a `.env` file with your configuration:
+2. Create a `.env` file (copy from the example):
 
    ```bash
-   # Hugging Face API Token (Get it from https://huggingface.co/settings/tokens)
-   HF_TOKEN=your_huggingface_token
-
-   # Ollama Configuration
-   OLLAMA_HOST=ollama
-   OLLAMA_PORT=11434
-
-   # Models to download from Hugging Face (comma-separated)
-   HF_MODELS=TinyLlama/TinyLlama-1.1B-Chat-v1.0
-
-   # Models to download from Ollama (comma-separated)
-   OLLAMA_MODELS=llama3.2:1b
+   cp .env.example .env
+   # Edit .env and add your Hugging Face token
    ```
 
 3. Start the services:
@@ -48,9 +59,6 @@ This repository contains a Docker Compose setup for running AI models using Olla
    ```bash
    # Build and start all services
    docker-compose up -d --build
-
-   # Check the status of the services
-   docker-compose ps
    ```
 
    This will:
@@ -59,102 +67,50 @@ This repository contains a Docker Compose setup for running AI models using Olla
    - Download llama3.2:1b from Ollama
 
 4. Access the Web UI:
+
    - Open your browser and navigate to `http://localhost:3000`
    - Wait for the models to finish downloading (check progress in logs)
 
-## Components
+### Usage
 
-- **Ollama**: Handles model serving and inference (runs on port 11434)
-- **Open WebUI**: Provides the user interface for interacting with models (runs on port 3000)
-- **Model Downloader**: Downloads and manages TinyLlama and llama3.2:1b models automatically
+**Web Interface**: Open `http://localhost:3000` to chat with the models through a web interface.
 
-## Directory Structure
-
-- `docker-compose.yml`: Service orchestration and container configuration
-- `.env`: Environment variables and model configuration
-- `Dockerfile.downloader`: Model downloader service configuration
-- `download.sh`: Script for downloading and setting up models
-- `models/`: Directory where downloaded models are stored
-- `.gitignore`: Specifies which files Git should ignore
-
-## Usage
-
-### Web Interface
-
-1. Open the Web UI at `http://localhost:3000`
-2. Available models:
-   - TinyLlama (downloaded from Hugging Face)
-   - llama3.2:1b (downloaded from Ollama)
-3. Features:
-   - Chat with models
-   - Switch between models
-   - Adjust model parameters
-   - View model information
-
-### Terminal Interface
-
-1. Single question/response:
-
-   ```bash
-   # Ask a single question
-   docker exec -it ollama ollama run llama3.2:1b "Your question here"
-   ```
-
-2. Interactive chat session:
-
-   ```bash
-   # Start an interactive chat session
-   docker exec -it ollama ollama run llama3.2:1b
-   ```
-
-3. API calls using curl:
-
-   ```bash
-   # Generate a response using the API
-   curl -X POST http://localhost:11434/api/generate -d '{
-     "model": "llama3.2:1b",
-     "prompt": "Your question here"
-   }'
-   ```
-
-### Model Management
+**Terminal Interface**:
 
 ```bash
-# List all available models
-docker exec -it ollama ollama list
+# Interactive chat
+docker exec -it ollama ollama run llama3.2:1b
 
-# Remove a model
-docker exec -it ollama ollama rm llama3.2:1b
-
-# Pull a specific model
-docker exec -it ollama ollama pull llama3.2:1b
+# Single question
+docker exec -it ollama ollama run llama3.2:1b "Your question here"
 ```
 
-## Troubleshooting
+**API Access**:
 
-1. If models fail to download:
+```bash
+curl -X POST http://localhost:11434/api/generate -d '{
+  "model": "llama3.2:1b",
+  "prompt": "Your question here"
+}'
+```
 
-   ```bash
-   # Check model downloader logs
-   docker-compose logs model-downloader
-   
-   # Check Ollama logs
-   docker-compose logs ollama
-   ```
+## 📝 Contributing
 
-2. If services aren't starting:
+Feel free to contribute new AI experiments, improvements, or documentation! Each experiment should:
 
-   ```bash
-   # Restart all services
-   docker-compose down
-   docker-compose up -d --build
-   ```
+1. Be well-documented with setup instructions
+2. Include any necessary configuration files
+3. Have clear usage examples
+4. Be organized in its own directory (for larger experiments)
 
-## Notes
+## 📚 Resources & References
 
-- Models are downloaded automatically during startup
-- Models are persisted in Docker volumes and the models directory
-- The Web UI runs on port 3000
-- Ollama API is available on port 11434
-- Both web interface and terminal commands can be used to interact with the models
-- First startup might take longer due to model downloads
+- [Ollama Documentation](https://ollama.ai/)
+- [Open WebUI](https://github.com/open-webui/open-webui)
+- [LiteLLM](https://docs.litellm.ai/)
+- [n8n](https://n8n.io/)
+- [LangChain](https://python.langchain.com/)
+
+## 🤝 License
+
+This repository is for educational and experimental purposes. Please respect the licenses of individual AI models and tools used within these experiments.
