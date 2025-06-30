@@ -113,4 +113,4 @@ Feel free to contribute new AI experiments, improvements, or documentation! Each
 
 ## 🤝 License
 
-This repository is for educational and experimental purposes. Please respect the licenses of individual AI models and tools used within these experiments.
+This repository is for educational and experimental purposes.
